@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="id">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Sistem Stok Barang</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header class="topbar">
+        <div class="container topbar-inner">
+            <div>
+                <p class="eyebrow">INVENTARIS</p>
+                <h1>Sistem Stok Barang</h1>
+            </div>
+            <span class="topbar-note">Panel pengelolaan barang</span>
+        </div>
+    </header>
+
+    <main class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <section class="messages" aria-live="polite">
+                    {% for category, message in messages %}
+                        <div class="alert {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </section>
+            {% endif %}
+        {% endwith %}
+
+        <section class="stats">
+            <article class="stat-card">
+                <span class="stat-label">Jenis barang</span>
+                <strong>{{ total_barang }}</strong>
+            </article>
+            <article class="stat-card">
+                <span class="stat-label">Total unit stok</span>
+                <strong>{{ total_stok }}</strong>
+            </article>
+            <article class="stat-card warning-card">
+                <span class="stat-label">Stok menipis</span>
+                <strong>{{ stok_menipis }}</strong>
+            </article>
+            <article class="stat-card danger-card">
+                <span class="stat-label">Stok habis</span>
+                <strong>{{ stok_habis }}</strong>
+            </article>
+        </section>
+
+        <section class="panel">
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow">DATA INVENTARIS</p>
+                    <h2>Daftar Stok Barang</h2>
+                </div>
+                <span class="item-count">{{ total_barang }} item</span>
+            </div>
+
+            {% if barang %}
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Kode</th>
+                            <th>Nama barang</th>
+                            <th>Stok</th>
+                            <th>Minimum</th>
+                            <th>Status</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in barang %}
+                        <tr>
+                            <td class="code">{{ item.kode }}</td>
+                            <td class="product-name">{{ item.nama }}</td>
+                            <td>{{ item.stok }}</td>
+                            <td>{{ item.stok_min }}</td>
+                            <td>
+                                <span class="status {{ item.status|lower }}">{{ item.status }}</span>
+                            </td>
+                            <td>
+                                <form action="{{ url_for('hapus_barang', barang_id=item.id) }}" method="post"
+                                      onsubmit="return confirm('Hapus barang {{ item.nama|e }}?')">
+                                    <button class="button-delete" type="submit">Hapus</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+                <p class="empty-state">Belum ada barang. Tambahkan barang melalui formulir di bawah.</p>
+            {% endif %}
+        </section>
+
+        <section class="forms-grid">
+            <article class="panel">
+                <div class="section-heading">
+                    <div>
+                        <p class="eyebrow">INVENTARIS BARU</p>
+                        <h2>Tambah Barang</h2>
+                    </div>
+                </div>
+                <form action="{{ url_for('tambah_barang') }}" method="post" class="form">
+                    <label>Kode barang
+                        <input name="kode" placeholder="Contoh: B03" maxlength="20" required>
+                    </label>
+                    <label>Nama barang
+                        <input name="nama" placeholder="Contoh: Buku tulis" maxlength="100" required>
+                    </label>
+                    <div class="two-fields">
+                        <label>Stok awal
+                            <input name="stok" type="number" min="0" value="0" required>
+                        </label>
+                        <label>Batas minimum
+                            <input name="stok_min" type="number" min="0" value="5" required>
+                        </label>
+                    </div>
+                    <button class="button-primary" type="submit">Tambah barang</button>
+                </form>
+            </article>
+
+            <article class="panel">
+                <div class="section-heading">
+                    <div>
+                        <p class="eyebrow">PERUBAHAN STOK</p>
+                        <h2>Transaksi Barang</h2>
+                    </div>
+                </div>
+                <form action="{{ url_for('transaksi') }}" method="post" class="form">
+                    <label>Kode barang
+                        <input name="kode" placeholder="Masukkan kode barang" maxlength="20" required>
+                    </label>
+                    <label>Jenis transaksi
+                        <select name="jenis" required>
+                            <option value="masuk">Barang masuk</option>
+                            <option value="keluar">Barang keluar</option>
+                        </select>
+                    </label>
+                    <label>Jumlah
+                        <input name="jumlah" type="number" min="1" placeholder="Contoh: 10" required>
+                    </label>
+                    <button class="button-primary" type="submit">Simpan transaksi</button>
+                </form>
+            </article>
+        </section>
+
+        <footer>© 2026 Sistem Stok Barang · Data tersimpan secara lokal menggunakan SQLite</footer>
+    </main>
+</body>
+</html>
